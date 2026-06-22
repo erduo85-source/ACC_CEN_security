@@ -1,0 +1,1518 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>游卡账号中心 - PC 安全管理原型</title>
+  <style>
+    :root {
+      --primary: #3774f6;
+      --action: #3774f6;
+      --warning: #ff6e06;
+      --success: #2dd892;
+      --danger: #ff4d4f;
+      --bg: #f6f8fa;
+      --surface: #ffffff;
+      --text: #333333;
+      --sub: rgba(29, 32, 36, 0.52);
+      --muted: #9ea2ae;
+      --border: #e8eef4;
+      --shadow: 0 12px 40px rgba(55, 82, 130, 0.10);
+      --modal-width: 490px;
+      --modal-content-width: 386px;
+      font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      min-width: 1180px;
+    }
+    button, input {
+      font: inherit;
+    }
+    button {
+      border: 0;
+      background: none;
+      cursor: pointer;
+    }
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .topbar {
+      height: 70px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid rgba(232, 238, 244, 0.9);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .topbar-inner {
+      width: 1480px;
+      max-width: calc(100vw - 80px);
+      height: 70px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #242629;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      width: 110px;
+      height: 38px;
+    }
+    .brand-logo img {
+      display: block;
+      width: 110px;
+      height: 38px;
+      object-fit: contain;
+    }
+    .brand-divider {
+      width: 1px;
+      height: 18px;
+      background: #cfd6df;
+    }
+    .user-entry {
+      position: relative;
+    }
+    .avatar-button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(29, 32, 36, 0.72);
+      font-size: 14px;
+      padding: 6px 8px;
+      border-radius: 20px;
+    }
+    .avatar-button:hover {
+      background: #f2f5fa;
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #eef3fb;
+      border: 1px solid #dbe6f7;
+    }
+    .user-menu {
+      position: absolute;
+      right: 0;
+      top: 58px;
+      width: 268px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 18px 45px rgba(36, 38, 41, 0.16);
+      border: 1px solid var(--border);
+      padding: 18px 16px 14px;
+      display: none;
+    }
+    .user-menu.open { display: block; }
+    .user-menu .avatar {
+      width: 48px;
+      height: 48px;
+      display: block;
+      margin: 0 auto 10px;
+    }
+    .menu-phone {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .menu-id {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      color: var(--sub);
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .menu-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0 0 12px;
+    }
+    .logout {
+      width: 100%;
+      color: rgba(29, 32, 36, 0.72);
+      font-size: 14px;
+      height: 36px;
+      border-radius: 8px;
+    }
+    .logout:hover { background: #f6f8fa; color: var(--primary); }
+
+    .shell {
+      width: 1180px;
+      margin: 60px auto 40px;
+      display: grid;
+      grid-template-columns: 276px 855px;
+      gap: 48px;
+      flex: 1;
+    }
+    .side-nav {
+      position: sticky;
+      top: 100px;
+      align-self: start;
+      background: #fff;
+      border-radius: 18px;
+      padding: 8px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(232, 238, 244, 0.7);
+    }
+    .nav-item {
+      width: 100%;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px;
+      border-radius: 12px;
+      color: rgba(29, 32, 36, 0.72);
+      font-weight: 500;
+      position: relative;
+      margin: 2px 0;
+      text-align: left;
+    }
+    .nav-item.active {
+      background: #f1f6ff;
+      color: var(--text);
+    }
+    .nav-item.active::before {
+      content: "";
+      position: absolute;
+      left: 12px;
+      width: 3px;
+      height: 22px;
+      border-radius: 3px;
+      background: linear-gradient(180deg, #3774f6, #9182ff);
+    }
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      display: inline-grid;
+      place-items: center;
+      color: var(--primary);
+    }
+    .nav-icon img,
+    .icon-img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+    .main {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .profile-card {
+      min-height: 307px;
+      border-radius: 18px;
+      border: 1px solid #e8eef4;
+      overflow: hidden;
+      position: relative;
+      background:
+        radial-gradient(circle at 74% 7%, rgba(145, 130, 255, .16), transparent 32%),
+        radial-gradient(circle at 5% 8%, rgba(255, 110, 6, .08), transparent 28%),
+        linear-gradient(135deg, #ffffff 0%, #f3f8ff 100%);
+      box-shadow: var(--shadow);
+    }
+    .profile-card::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -70px;
+      width: 420px;
+      height: 420px;
+      background: url("assets/decor-lines.png") center/contain no-repeat;
+      opacity: .12;
+      transform: rotate(18deg);
+    }
+    .profile-head {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 106px 1fr;
+      gap: 22px;
+      padding: 34px 50px 22px;
+      align-items: center;
+    }
+    .profile-avatar {
+      width: 106px;
+      height: 106px;
+      border-radius: 50%;
+      border: 3px solid rgba(55, 116, 246, .12);
+      object-fit: cover;
+      background: #eaf2ff;
+    }
+    .identity-line {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+    .identity-line strong {
+      font-size: 24px;
+      line-height: 30px;
+      font-weight: 700;
+    }
+    .realname {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 11px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--primary);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .account-id {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(29, 32, 36, .34);
+      font-size: 15px;
+    }
+    .copy-btn {
+      width: 22px;
+      height: 22px;
+      color: #aeb6c4;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 5px;
+    }
+    .copy-btn:hover {
+      color: var(--primary);
+      background: #edf4ff;
+    }
+    .login-cards {
+      position: relative;
+      z-index: 1;
+      padding: 0 50px 36px 176px;
+      display: grid;
+      gap: 16px;
+    }
+    .login-row {
+      min-height: 60px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.76);
+      display: grid;
+      grid-template-columns: 36px 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 24px 12px 16px;
+      border: 1px solid rgba(232,238,244,.78);
+    }
+    .login-row.highlight {
+      box-shadow: 0 8px 22px rgba(55, 116, 246, .16);
+    }
+    .login-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: rgba(0,0,0,.56);
+    }
+    .login-desc {
+      color: var(--warning);
+      background: #fff8ed;
+      display: inline-block;
+      margin-top: 3px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .login-row:not(.highlight) .login-desc {
+      color: rgba(29,32,36,.3);
+      background: transparent;
+      padding: 0;
+    }
+    .link-btn {
+      color: var(--action);
+      font-weight: 600;
+      font-size: 14px;
+      padding: 6px 0;
+    }
+    .link-btn:hover { color: #1f63e8; }
+    .link-btn.static,
+    .link-btn.static:hover {
+      color: var(--action);
+      cursor: default;
+    }
+    .round-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #eef5ff;
+      color: var(--primary);
+    }
+    .round-icon img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+    .section-card {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid rgba(232, 238, 244, .75);
+      box-shadow: 0 6px 24px rgba(55, 82, 130, 0.06);
+      padding: 30px 50px;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .section-title h2 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 28px;
+      font-weight: 700;
+      position: relative;
+      padding-left: 18px;
+    }
+    .section-title h2::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 4px;
+      width: 6px;
+      height: 20px;
+      border-radius: 2px;
+      background: linear-gradient(180deg, #3774f6, #9182ff);
+    }
+    .help-link {
+      color: var(--warning);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 22px;
+      background: transparent;
+      padding: 0;
+    }
+    .info-list {
+      display: grid;
+      gap: 0;
+    }
+    .info-row {
+      min-height: 88px;
+      display: grid;
+      grid-template-columns: 48px 1fr 154px;
+      gap: 22px;
+      align-items: center;
+      border-top: 1px solid #f1f3f7;
+    }
+    .info-row:first-child { border-top: 0; }
+    .row-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--primary);
+      background: #eef5ff;
+    }
+    .row-icon img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
+    .row-icon.green { color: #21c889; background: #e9fff6; }
+    .row-icon.cyan { color: #22c2da; background: #e9fbff; }
+    .row-icon.blue { color: #4a88fc; background: #eef5ff; }
+    .row-main h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      line-height: 20px;
+      font-weight: 600;
+      color: rgba(0,0,0,.68);
+    }
+    .row-main p {
+      margin: 0;
+      color: rgba(29,32,36,.34);
+      font-size: 14px;
+      line-height: 22px;
+    }
+    .row-action {
+      justify-self: end;
+      min-width: 80px;
+      text-align: right;
+    }
+    .third-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding-top: 8px;
+    }
+    .third-item {
+      height: 116px;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 8px;
+      border-radius: 12px;
+    }
+    .third-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: #fff;
+    }
+    .third-name { font-size: 14px; color: rgba(0,0,0,.72); }
+    .third-action { color: var(--action); font-size: 14px; font-weight: 600; }
+    .footer {
+      height: 150px;
+      background: #fff;
+      margin-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+    .footer-inner {
+      width: 1000px;
+      margin: 0 auto;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #666;
+      font-size: 13px;
+    }
+    .footer-logo {
+      display: inline-flex;
+      align-items: center;
+      width: 145px;
+      height: 42px;
+    }
+    .footer-logo img {
+      display: block;
+      width: 145px;
+      height: 42px;
+      object-fit: contain;
+    }
+    .footer-links {
+      text-align: right;
+      line-height: 2;
+    }
+    .footer-links button {
+      color: #292730;
+      font-size: 14px;
+      margin-left: 34px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 32px;
+      top: 92px;
+      z-index: 100;
+      background: rgba(29,32,36,.92);
+      color: #fff;
+      min-width: 180px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      box-shadow: 0 14px 36px rgba(0,0,0,.18);
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+      transition: .2s ease;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .modal-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,.5);
+    }
+    .modal-layer.open { display: flex; }
+    .confirm-layer {
+      z-index: 70;
+      background: rgba(0,0,0,.3);
+    }
+    .modal {
+      width: var(--modal-width);
+      min-width: var(--modal-width);
+      max-width: var(--modal-width);
+      height: 520px;
+      background:
+        radial-gradient(circle at 28% -8%, rgba(255,110,6,.12), transparent 34%),
+        radial-gradient(circle at 78% -8%, rgba(55,116,246,.14), transparent 35%),
+        #fff;
+      border-radius: 24px;
+      box-shadow: 0 28px 80px rgba(0,0,0,.28);
+      position: relative;
+      padding: 24px 52px 38px;
+      max-height: calc(100vh - 80px);
+      overflow: hidden;
+    }
+    .verify-modal {
+      width: var(--modal-width);
+      min-width: var(--modal-width);
+      max-width: var(--modal-width);
+      height: 486px;
+      padding: 24px 52px 54px;
+      background:
+        radial-gradient(circle at 22% -10%, rgba(255, 110, 6, .10), transparent 30%),
+        radial-gradient(circle at 74% -8%, rgba(55, 116, 246, .10), transparent 32%),
+        #fff;
+    }
+    .modal.wide { width: 560px; }
+    .modal-close {
+      position: absolute;
+      right: 22px;
+      top: 20px;
+      width: 28px;
+      height: 28px;
+      color: #7f828a;
+      border-radius: 8px;
+    }
+    .modal-close:hover { background: #f2f4f8; color: var(--text); }
+    .confirm-modal {
+      width: 490px;
+      height: 295px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 18% -18%, rgba(255,110,6,.10), transparent 38%),
+        radial-gradient(circle at 88% -8%, rgba(55,116,246,.10), transparent 38%),
+        #fff;
+      box-shadow: 0 28px 80px rgba(0,0,0,.24);
+    }
+    .confirm-title {
+      margin: 48px 0 24px;
+      color: #333;
+      text-align: center;
+      font-size: 22px;
+      line-height: 40px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+    .confirm-message {
+      width: 400px;
+      margin: 0 auto;
+      color: #242629;
+      font-size: 16px;
+      line-height: 26px;
+      font-weight: 400;
+      letter-spacing: 1px;
+    }
+    .confirm-actions {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 71px;
+      border-top: 1px solid #edf0f5;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .confirm-actions::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 15px;
+      width: 1px;
+      height: 40px;
+      background: #edf0f5;
+    }
+    .confirm-btn {
+      color: var(--action);
+      font-size: 20px;
+      line-height: 34px;
+      font-weight: 400;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .confirm-btn:hover { background: rgba(55,116,246,.04); }
+    .modal-art {
+      display: block;
+      width: 92px;
+      height: 92px;
+      margin: 0 auto 6px;
+      border-radius: 20px;
+      object-fit: contain;
+      object-position: center;
+      opacity: .8;
+    }
+    .modal h2 {
+      height: 40px;
+      margin: 0;
+      text-align: center;
+      font-size: 22px;
+      line-height: 40px;
+      font-weight: 600;
+      color: #333;
+    }
+    .modal-note {
+      width: 364px;
+      min-height: 24px;
+      border-radius: 2px;
+      background: #fff8ed;
+      color: var(--warning);
+      font-size: 14px;
+      line-height: 18px;
+      text-align: left;
+      margin: 0 auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 4px;
+      padding: 0 16px;
+      letter-spacing: .1px;
+    }
+    .modal-note::before {
+      content: "i";
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1px solid currentColor;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 16px;
+      font-size: 12px;
+      line-height: 1;
+      font-family: Arial, sans-serif;
+      font-weight: 700;
+    }
+    .verify-modal .modal-art {
+      width: 92px;
+      height: 92px;
+      margin-bottom: 6px;
+      object-fit: contain;
+      object-position: center;
+      opacity: 1;
+    }
+    .verify-modal h2 {
+      font-size: 22px;
+      line-height: 40px;
+    }
+    .verify-modal .modal-note {
+      width: 142px;
+      min-height: 18px;
+      line-height: 18px;
+      font-size: 14px;
+      margin: 0 auto 32px;
+      padding: 0;
+      background: transparent;
+      color: #242629;
+      justify-content: center;
+      text-align: center;
+    }
+    .verify-modal .modal-note::before { content: none; }
+    .verify-field {
+      height: 56px;
+      border-radius: 10px;
+      background: #f5f7f9;
+      display: grid;
+      grid-template-columns: 92px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 0 16px;
+      margin-bottom: 12px;
+      color: rgba(0,0,0,.5);
+      font-weight: 500;
+    }
+    .verify-modal .verify-field {
+      width: var(--modal-content-width);
+      height: 50px;
+      border: 1px solid #e7e8ee;
+      border-radius: 12px;
+      grid-template-columns: 68px 1fr auto;
+      padding: 0 16px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      text-align: left;
+      background: #fafafc;
+      font-weight: 400;
+    }
+    .verify-modal .code-field { margin-bottom: 40px; }
+    .verify-value {
+      color: rgba(0,0,0,.8);
+      font-size: 16px;
+      line-height: 24px;
+    }
+    .verify-input {
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+      min-width: 0;
+    }
+    .send-code {
+      color: var(--action);
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .send-code[disabled] { color: var(--muted); cursor: default; }
+    .verify-methods {
+      position: absolute;
+      left: 52px;
+      top: 266px;
+      z-index: 3;
+      width: var(--modal-content-width);
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 22px rgba(54,64,82,.16);
+      overflow: hidden;
+      display: none;
+    }
+    .verify-modal .verify-methods {
+      border-radius: 8px;
+    }
+    .verify-methods.open { display: block; }
+    .method-option {
+      height: 48px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      padding: 0 16px;
+      align-items: center;
+      text-align: left;
+      color: rgba(0,0,0,.56);
+      font-size: 14px;
+    }
+    .method-option:hover { background: #f6f8fa; }
+    .primary-btn {
+      width: 100%;
+      height: 56px;
+      border-radius: 999px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 18px;
+    }
+    .verify-modal .primary-btn {
+      width: var(--modal-content-width);
+      height: 56px;
+      margin-top: 0;
+      font-size: 16px;
+    }
+    .primary-btn:disabled {
+      background: #e7e8ee;
+      color: #b9bcc6;
+      cursor: default;
+    }
+    .game-list {
+      display: grid;
+      gap: 24px;
+      margin-top: 32px;
+    }
+    .game-row {
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      min-height: 44px;
+    }
+    .game-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      display: block;
+      overflow: hidden;
+      background: #d9d9d9;
+      flex: none;
+    }
+    .game-icon img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+    .game-name {
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 500;
+      margin-bottom: 0;
+      color: rgba(0,0,0,.8);
+    }
+    .game-status {
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .game-status.on { color: var(--success); }
+    .game-status.frozen { color: var(--danger); }
+    .switch {
+      width: 48px;
+      height: 24px;
+      border-radius: 999px;
+      background: #d7dce2;
+      padding: 3px;
+      transition: .2s ease;
+    }
+    .switch::before {
+      content: "";
+      display: block;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,.18);
+      transition: .2s ease;
+    }
+    .switch.on { background: var(--success); }
+    .switch.on::before { transform: translateX(24px); }
+    .freeze-action {
+      color: var(--action);
+      font-size: 14px;
+      font-weight: 600;
+      min-width: 36px;
+      text-align: right;
+    }
+    .device-modal {
+      width: var(--modal-width);
+      min-width: var(--modal-width);
+      max-width: var(--modal-width);
+      height: 540px;
+      padding: 24px 52px 54px;
+      overflow: hidden;
+    }
+    .device-modal .modal-art {
+      width: 92px;
+      height: 92px;
+      margin-bottom: 6px;
+      object-fit: contain;
+      object-position: center;
+      opacity: 1;
+    }
+    .device-modal h2 {
+      font-size: 22px;
+      line-height: 40px;
+    }
+    .device-modal .modal-note {
+      width: var(--modal-content-width);
+      min-height: 44px;
+      line-height: 18px;
+      font-size: 14px;
+      margin: 0 auto;
+      padding: 4px 12px;
+      background: #fff8ed;
+      color: var(--warning);
+      align-items: flex-start;
+      gap: 4px;
+    }
+    .device-modal .modal-note::before {
+      margin-top: 1px;
+    }
+    .device-list {
+      display: grid;
+      gap: 24px;
+      margin-top: 32px;
+      max-height: none;
+      overflow: visible;
+    }
+    .device-row {
+      min-height: 44px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+      border-bottom: 0;
+    }
+    .device-name {
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 500;
+      color: rgba(0,0,0,.8);
+      margin-bottom: 0;
+    }
+    .device-meta {
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .device-action {
+      min-width: 28px;
+      text-align: right;
+      color: var(--action);
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 500;
+    }
+    .device-action.current {
+      color: var(--action);
+      cursor: default;
+    }
+    .simple-icon {
+      width: 20px;
+      height: 20px;
+      display: block;
+    }
+    @media (max-width: 1280px) {
+      body { min-width: 1120px; }
+      .shell { width: 1100px; grid-template-columns: 250px 810px; gap: 40px; }
+      .topbar-inner { max-width: 1100px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <span class="brand-logo"><img src="assets/figma-brand-logo.png" alt="游卡" /></span>
+          <span>账号中心</span>
+        </div>
+        <div class="user-entry">
+          <button class="avatar-button" id="avatarButton" type="button">
+            <img class="avatar" src="assets/avatar.png" alt="用户头像" />
+            <span>157****8975</span>
+          </button>
+          <div class="user-menu" id="userMenu">
+            <img class="avatar" src="assets/avatar.png" alt="用户头像" />
+            <div class="menu-phone">157****8975</div>
+            <div class="menu-id">
+              <span>ID：31000340592900</span>
+              <button class="copy-btn" data-copy="31000340592900" title="复制 ID" type="button">⧉</button>
+            </div>
+            <div class="menu-divider"></div>
+            <button class="logout" id="logoutButton" type="button">退出登录</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell">
+      <nav class="side-nav" aria-label="安全管理导航">
+        <button class="nav-item active" type="button" data-target="account">
+          <span class="nav-icon"><img src="assets/icons/nav-account.png" alt="" /></span><span>账号信息</span>
+        </button>
+        <button class="nav-item" type="button" data-target="security">
+          <span class="nav-icon"><img src="assets/icons/nav-security.png" alt="" /></span><span>安全信息</span>
+        </button>
+        <button class="nav-item" type="button" data-target="protection">
+          <span class="nav-icon"><img src="assets/icons/nav-protection.png" alt="" /></span><span>安全防护</span>
+        </button>
+      </nav>
+
+      <section class="main">
+        <section class="profile-card" id="account">
+          <div class="profile-head">
+            <img class="profile-avatar" src="assets/avatar.png" alt="用户头像" />
+            <div>
+              <div class="identity-line">
+                <strong>157****8975</strong>
+                <span class="realname">未实名</span>
+              </div>
+              <div class="account-id">
+                <span>ID：31000340592900</span>
+                <button class="copy-btn" data-copy="31000340592900" title="复制 ID" type="button">⧉</button>
+              </div>
+            </div>
+          </div>
+          <div class="login-cards">
+            <div class="login-row highlight">
+              <span class="round-icon"><img src="assets/icons/login-phone.png" alt="" /></span>
+              <div>
+                <div class="login-title">登录手机</div>
+                <div class="login-desc">绑定登录手机后，可使用手机登录进入游戏</div>
+              </div>
+              <span class="link-btn static">绑定</span>
+            </div>
+            <div class="login-row">
+              <span class="round-icon"><img src="assets/icons/login-account.png" alt="" /></span>
+              <div>
+                <div class="login-title">通行证帐号</div>
+                <div class="login-desc">设置通行证账号后，可通过账密方式登录游戏</div>
+              </div>
+              <span class="link-btn static">设置</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-card" id="security">
+          <div class="section-title">
+            <h2>安全信息</h2>
+            <span class="help-link">密保问题在哪里？</span>
+          </div>
+          <div class="info-list">
+            <div class="info-row">
+              <span class="row-icon blue"><img src="assets/icons/security-password.png" alt="" /></span>
+              <div class="row-main">
+                <h3>登录密码</h3>
+                <p>上次修改时间120天前，请及时更新密码</p>
+              </div>
+              <span class="link-btn static row-action">修改</span>
+            </div>
+            <div class="info-row">
+              <span class="row-icon blue"><img src="assets/icons/security-phone.png" alt="" /></span>
+              <div class="row-main">
+                <h3>安全手机</h3>
+                <p>可用于忘记密码或账号被盗时快速重置密码</p>
+              </div>
+              <span class="link-btn static row-action">换绑</span>
+            </div>
+            <div class="info-row">
+              <span class="row-icon blue"><img src="assets/icons/security-email.png" alt="" /></span>
+              <div class="row-main">
+                <h3>安全邮箱</h3>
+                <p>可用于忘记密码或账号被盗时快速重置密码</p>
+              </div>
+              <span class="link-btn static row-action">绑定</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-card" id="protection">
+          <div class="section-title">
+            <h2>安全防护</h2>
+          </div>
+          <div class="info-list">
+            <div class="info-row">
+              <span class="row-icon green"><img src="assets/icons/row-login-protection.png" alt="" /></span>
+              <div class="row-main">
+                <h3>登录保护</h3>
+                <p>开启后登录游戏时需先完成验证码验证</p>
+              </div>
+              <button class="link-btn row-action" type="button" data-verify="protection">管理</button>
+            </div>
+            <div class="info-row">
+              <span class="row-icon cyan"><img src="assets/icons/row-device.png" alt="" /></span>
+              <div class="row-main">
+                <h3>登录设备</h3>
+                <p>如注意到任何异常现象，请及时更换您的密码</p>
+              </div>
+              <button class="link-btn row-action" type="button" data-verify="device">管理</button>
+            </div>
+            <div class="info-row">
+              <span class="row-icon blue"><img src="assets/icons/row-lock.png" alt="" /></span>
+              <div class="row-main">
+                <h3>登录锁定</h3>
+                <p>当存在被盗风险或长期不使用时，可暂时锁定</p>
+              </div>
+              <button class="link-btn row-action" type="button" data-verify="freeze">管理</button>
+            </div>
+          </div>
+        </section>
+
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-logo"><img src="assets/figma-footer-logo.png" alt="游卡" /></div>
+        <div class="footer-links">
+          <div>
+            <button type="button" data-toast="用户协议链接为原型占位">用户协议</button>
+            <button type="button" data-toast="隐私协议链接为原型占位">隐私协议</button>
+          </div>
+          <div>杭州游卡网络技术有限公司 版权所有</div>
+          <div>©2016-2024 Hangzhou Yoka Network Technology Co., Ltd</div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="modal-layer" id="verifyLayer" aria-hidden="true">
+    <div class="modal verify-modal" role="dialog" aria-modal="true" aria-labelledby="verifyTitle">
+      <button class="modal-close" type="button" data-close>×</button>
+      <img class="modal-art" src="assets/verify-art.png" alt="" />
+      <h2 id="verifyTitle">安全验证</h2>
+      <p class="modal-note">请输入验证码验证身份</p>
+      <button class="verify-field" id="methodToggle" type="button">
+        <span id="methodLabel">安全手机</span>
+        <span class="verify-value" id="methodValue">157****8975</span>
+        <span>⌄</span>
+      </button>
+      <div class="verify-methods" id="methodMenu">
+        <button class="method-option" type="button" data-method="phone" data-label="安全手机" data-value="157****8975"><span>安全手机</span><span>157****8975</span></button>
+        <button class="method-option" type="button" data-method="email" data-label="安全邮箱" data-value="177****277@qq.com"><span>安全邮箱</span><span>177****277@qq.com</span></button>
+      </div>
+      <div class="verify-field code-field">
+        <span>验证码</span>
+        <input class="verify-input" id="codeInput" inputmode="numeric" maxlength="6" placeholder="请输入验证码" />
+        <button class="send-code" id="sendCode" type="button">发送</button>
+      </div>
+      <button class="primary-btn" id="verifyConfirm" type="button" disabled>确认</button>
+    </div>
+  </div>
+
+  <div class="modal-layer" id="protectionLayer" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="protectionTitle">
+      <button class="modal-close" type="button" data-close>×</button>
+      <img class="modal-art" src="assets/lock-art.png" alt="" />
+      <h2 id="protectionTitle">登录保护管理</h2>
+      <p class="modal-note">开启游戏登录保护后，登录时需完成验证码</p>
+      <div class="game-list" id="protectionList"></div>
+    </div>
+  </div>
+
+  <div class="modal-layer" id="freezeLayer" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="freezeTitle">
+      <button class="modal-close" type="button" data-close>×</button>
+      <img class="modal-art" src="assets/lock-art.png" alt="" />
+      <h2 id="freezeTitle">登录冻结管理</h2>
+      <p class="modal-note">账号冻结开启后，所有设备均无法登录该游戏</p>
+      <div class="game-list" id="freezeList"></div>
+    </div>
+  </div>
+
+  <div class="modal-layer" id="deviceLayer" aria-hidden="true">
+    <div class="modal device-modal" role="dialog" aria-modal="true" aria-labelledby="deviceTitle">
+      <button class="modal-close" type="button" data-close>×</button>
+      <img class="modal-art" src="assets/device-art-figma.png" alt="" />
+      <h2 id="deviceTitle">登录设备管理</h2>
+      <p class="modal-note">若非本人登录，请及时移除并修改账号安全信息<br>以下是您近60天内登录过的设备：</p>
+      <div class="device-list" id="deviceList"></div>
+    </div>
+  </div>
+
+  <div class="modal-layer confirm-layer" id="confirmLayer" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <h2 class="confirm-title" id="confirmTitle">温馨提示</h2>
+      <p class="confirm-message" id="confirmMessage"></p>
+      <div class="confirm-actions">
+        <button class="confirm-btn" id="confirmCancel" type="button">我再想想</button>
+        <button class="confirm-btn" id="confirmSubmit" type="button">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const accountId = "31000340592900";
+    const protectionGames = [
+      { id: "sgs-mobile", name: "三国杀移动版", icon: "sgs-mobile.png", on: true },
+      { id: "sgs-yj", name: "三国杀移动版", icon: "yijiang.png", on: false },
+      { id: "sgs-ol", name: "三国杀移动版", icon: "ol.png", on: false },
+      { id: "sgs-mj", name: "三国杀移动版", icon: "mingjiang.png", on: false }
+    ];
+    const freezeGames = [
+      { id: "freeze-mobile", name: "三国杀移动版", icon: "sgs-mobile.png", frozen: true },
+      { id: "freeze-yj", name: "三国杀移动版", icon: "yijiang.png", frozen: false },
+      { id: "freeze-ol", name: "三国杀移动版", icon: "ol.png", frozen: false },
+      { id: "freeze-mj", name: "三国杀移动版", icon: "mingjiang.png", frozen: false }
+    ];
+    const loginDevices = [
+      { id: "pc-1", name: "Windows PC", date: "2026-01-16", location: "中国 上海", current: false },
+      { id: "pc-2", name: "Windows PC", date: "2026-01-16", location: "中国 上海", current: false },
+      { id: "pc-3", name: "Windows PC", date: "2026-01-16", location: "中国 上海", current: false },
+      { id: "pc-4", name: "Windows PC", date: "2026-01-16", location: "中国 上海", current: false }
+    ];
+
+    let pendingAction = null;
+    let pendingConfirm = null;
+    let timer = null;
+    let seconds = 0;
+
+    const toast = document.getElementById("toast");
+    const userMenu = document.getElementById("userMenu");
+    const verifyLayer = document.getElementById("verifyLayer");
+    const protectionLayer = document.getElementById("protectionLayer");
+    const freezeLayer = document.getElementById("freezeLayer");
+    const deviceLayer = document.getElementById("deviceLayer");
+    const confirmLayer = document.getElementById("confirmLayer");
+    const confirmMessage = document.getElementById("confirmMessage");
+    const confirmSubmit = document.getElementById("confirmSubmit");
+    const confirmCancel = document.getElementById("confirmCancel");
+    const methodMenu = document.getElementById("methodMenu");
+    const methodLabel = document.getElementById("methodLabel");
+    const methodValue = document.getElementById("methodValue");
+    const codeInput = document.getElementById("codeInput");
+    const sendCode = document.getElementById("sendCode");
+    const verifyConfirm = document.getElementById("verifyConfirm");
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function openLayer(layer) {
+      layer.classList.add("open");
+      layer.setAttribute("aria-hidden", "false");
+    }
+
+    function closeLayer(layer) {
+      layer.classList.remove("open");
+      layer.setAttribute("aria-hidden", "true");
+    }
+
+    function requestConfirm(options) {
+      pendingConfirm = options.onConfirm;
+      confirmMessage.textContent = options.message;
+      confirmSubmit.textContent = options.confirmText || "确认";
+      openLayer(confirmLayer);
+      confirmCancel.focus();
+    }
+
+    function closeConfirm() {
+      pendingConfirm = null;
+      closeLayer(confirmLayer);
+    }
+
+    function resetVerify() {
+      codeInput.value = "";
+      verifyConfirm.disabled = true;
+      methodMenu.classList.remove("open");
+      window.clearInterval(timer);
+      seconds = 0;
+      sendCode.disabled = false;
+      sendCode.textContent = "发送";
+    }
+
+    function requestVerify(action) {
+      pendingAction = action;
+      resetVerify();
+      openLayer(verifyLayer);
+      codeInput.focus();
+    }
+
+    function completePendingAction() {
+      closeLayer(verifyLayer);
+      if (pendingAction === "protection") {
+        renderProtection();
+        openLayer(protectionLayer);
+      } else if (pendingAction === "freeze") {
+        renderFreeze();
+        openLayer(freezeLayer);
+      } else if (pendingAction === "device") {
+        renderDevices();
+        window.setTimeout(() => openLayer(deviceLayer), 120);
+      } else if (pendingAction === "toast") {
+        showToast(verifyConfirm.dataset.toast || "验证成功，后续流程不在本期范围");
+      }
+      pendingAction = null;
+    }
+
+    function renderProtection() {
+      const list = document.getElementById("protectionList");
+      list.innerHTML = protectionGames.map(game => `
+        <div class="game-row">
+          <span class="game-icon"><img src="assets/game-icons/${game.icon}" alt="" /></span>
+          <div>
+            <div class="game-name">${game.name}</div>
+            <div class="game-status ${game.on ? "on" : ""}">${game.on ? "已开启" : "未开启"}</div>
+          </div>
+          <button class="switch ${game.on ? "on" : ""}" type="button" data-protection="${game.id}" aria-label="切换${game.name}登录保护"></button>
+        </div>
+      `).join("");
+    }
+
+    function renderFreeze() {
+      const list = document.getElementById("freezeList");
+      list.innerHTML = freezeGames.map(game => `
+        <div class="game-row">
+          <span class="game-icon"><img src="assets/game-icons/${game.icon}" alt="" /></span>
+          <div>
+            <div class="game-name">${game.name}</div>
+            <div class="game-status ${game.frozen ? "frozen" : ""}">${game.frozen ? "已冻结" : "未冻结"}</div>
+          </div>
+          <button class="freeze-action" type="button" data-freeze="${game.id}">${game.frozen ? "解冻" : "冻结"}</button>
+        </div>
+      `).join("");
+    }
+
+    function renderDevices() {
+      const list = document.getElementById("deviceList");
+      list.innerHTML = loginDevices.map(device => `
+        <div class="device-row">
+          <div>
+            <div class="device-name">${device.name}</div>
+            <div class="device-meta">${device.date}<span>　</span>${device.location}</div>
+          </div>
+          <button class="device-action ${device.current ? "current" : ""}" type="button" data-remove-device="${device.id}">移除</button>
+        </div>
+      `).join("");
+    }
+
+    document.getElementById("avatarButton").addEventListener("click", (event) => {
+      event.stopPropagation();
+      userMenu.classList.toggle("open");
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".user-entry")) userMenu.classList.remove("open");
+    });
+
+    document.querySelectorAll("[data-target]").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+        document.getElementById(button.dataset.target).scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+
+    document.querySelectorAll("[data-toast]").forEach(el => {
+      el.addEventListener("click", () => showToast(el.dataset.toast));
+    });
+
+    document.getElementById("logoutButton").addEventListener("click", (event) => {
+      event.stopPropagation();
+      userMenu.classList.remove("open");
+      requestConfirm({
+        message: "确认要安全退出当前账号吗？退出后，再次访问账号中心需要重新登录。",
+        confirmText: "确认退出",
+        onConfirm: () => showToast("退出登录为原型占位，不处理真实登录态")
+      });
+    });
+
+    document.querySelectorAll("[data-copy]").forEach(button => {
+      button.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        try {
+          await navigator.clipboard.writeText(button.dataset.copy || accountId);
+          showToast("账号 ID 已复制");
+        } catch {
+          showToast("账号 ID：" + (button.dataset.copy || accountId));
+        }
+      });
+    });
+
+    document.querySelectorAll("[data-verify]").forEach(button => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        verifyConfirm.dataset.toast = button.dataset.toast || "";
+        requestVerify(button.dataset.verify);
+      });
+    });
+
+    document.getElementById("methodToggle").addEventListener("click", () => {
+      methodMenu.classList.toggle("open");
+    });
+
+    document.querySelectorAll("[data-method]").forEach(button => {
+      button.addEventListener("click", () => {
+        methodLabel.textContent = button.dataset.label;
+        methodValue.textContent = button.dataset.value;
+        methodMenu.classList.remove("open");
+      });
+    });
+
+    sendCode.addEventListener("click", () => {
+      seconds = 60;
+      sendCode.disabled = true;
+      sendCode.textContent = `${seconds}S`;
+      showToast("验证码已发送");
+      timer = window.setInterval(() => {
+        seconds -= 1;
+        sendCode.textContent = `${seconds}S`;
+        if (seconds <= 0) {
+          window.clearInterval(timer);
+          sendCode.disabled = false;
+          sendCode.textContent = "重新发送";
+        }
+      }, 1000);
+    });
+
+    codeInput.addEventListener("input", () => {
+      verifyConfirm.disabled = codeInput.value.trim().length < 4;
+    });
+
+    verifyConfirm.addEventListener("click", () => {
+      completePendingAction();
+    });
+
+    confirmCancel.addEventListener("click", () => {
+      closeConfirm();
+    });
+
+    confirmSubmit.addEventListener("click", () => {
+      const action = pendingConfirm;
+      closeConfirm();
+      if (typeof action === "function") action();
+    });
+
+    document.querySelectorAll("[data-close]").forEach(button => {
+      button.addEventListener("click", () => closeLayer(button.closest(".modal-layer")));
+    });
+
+    document.querySelectorAll(".modal-layer").forEach(layer => {
+      layer.addEventListener("click", (event) => {
+        if (event.target !== layer) return;
+        if (layer === confirmLayer) {
+          closeConfirm();
+          return;
+        }
+        closeLayer(layer);
+      });
+    });
+
+    document.getElementById("protectionList").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-protection]");
+      if (!button) return;
+      const game = protectionGames.find(item => item.id === button.dataset.protection);
+      const nextOn = !game.on;
+      requestConfirm({
+        message: nextOn
+          ? "确认开启该游戏的登录保护吗？开启后，使用账号密码登录时，需要先通过短信或邮件验证。"
+          : "确认关闭该游戏的登录保护吗？关闭后，使用账号密码登录时，将不再进行短信或邮件验证。",
+        confirmText: nextOn ? "确认开启" : "确认关闭",
+        onConfirm: () => {
+          game.on = nextOn;
+          renderProtection();
+          showToast(game.on ? "已开启登录保护" : "已关闭登录保护");
+        }
+      });
+    });
+
+    document.getElementById("freezeList").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-freeze]");
+      if (!button) return;
+      const game = freezeGames.find(item => item.id === button.dataset.freeze);
+      const nextFrozen = !game.frozen;
+      requestConfirm({
+        message: nextFrozen
+          ? "确认要冻结该游戏的登录吗？冻结期间，你将无法登录此游戏。"
+          : "确认要解除该游戏的登录冻结吗？解除后，你可以正常登录此游戏。",
+        confirmText: nextFrozen ? "确认冻结" : "确认解冻",
+        onConfirm: () => {
+          game.frozen = nextFrozen;
+          renderFreeze();
+          showToast(game.frozen ? "已冻结该游戏登录" : "已解除该游戏冻结");
+        }
+      });
+    });
+
+    document.getElementById("deviceList").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-remove-device]");
+      if (!button) return;
+      const index = loginDevices.findIndex(item => item.id === button.dataset.removeDevice);
+      if (index < 0) return;
+      requestConfirm({
+        message: "确认要注销该登录设备吗？注销后，该设备上的登录状态将被清除，下次游玩时需重新登录。",
+        confirmText: "确认注销",
+        onConfirm: () => {
+          loginDevices.splice(index, 1);
+          renderDevices();
+          showToast("已注销登录设备");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
