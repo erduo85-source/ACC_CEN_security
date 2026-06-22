@@ -20,7 +20,7 @@ prototype/index.html
 
 或从仓库根目录打开 `index.html`，会自动跳转到原型页面。
 
-## GitHub Pages 配置建议
+## GitHub Pages 配置
 
 在仓库 `Settings -> Pages` 中配置：
 
